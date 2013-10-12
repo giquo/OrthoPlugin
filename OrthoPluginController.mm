@@ -143,6 +143,9 @@
     NSMutableArray  *roiSeriesList;
     NSMutableArray  *roiImageList;
     DCMPix			*curPix;
+    
+    
+    
     //NSString		*roiName = 0L;
     long			i;
     // In this plugin, we will take the selected roi of the current 2D viewer
@@ -189,6 +192,7 @@
             NSBitmapImageRep* temp = [bitmap smoothen:kernelSize];
             [image addRepresentation:temp];
             
+            
             _originalFemurOpacityLayer = [_viewerController addLayerRoiToCurrentSliceWithImage:[image autorelease] referenceFilePath:@"none" layerPixelSpacingX:[[[_viewerController imageView] curDCM] pixelSpacingX] layerPixelSpacingY:[[[_viewerController imageView] curDCM] pixelSpacingY]];
             [_originalFemurOpacityLayer setSelectable:NO];
             [_originalFemurOpacityLayer setDisplayTextualData:NO];
@@ -203,10 +207,22 @@
             [[NSNotificationCenter defaultCenter] postNotificationName:OsirixROIChangeNotification object:_femurRoi userInfo:NULL];
             
             [_viewerController selectROI:_femurLayer deselectingOther:YES];
-            [_viewerController bringToFrontROI:_femurLayer];
+            //[_viewerController bringToFrontROI:_femurLayer];
         }
     }
     
+    // layer point, rotation center
+    _rotationCenter = [_viewerController newROI:t2DPoint];
+    
+    //NSMutableArray *centerPoint = [rotationCenter points];           // points of _magnificationLine (empty)
+    
+    // values in pixels (NOT IN mm!)
+    NSRect myRect = NSMakeRect([_femurLayer centroid].x, [_femurLayer centroid].y, 0, 0);
+    [_rotationCenter setROIRect:myRect];
+    
+    [roiImageList addObject:_rotationCenter];
+    [_rotationCenter setDisplayTextualData:NO];
+    [_viewerController bringToFrontROI:_rotationCenter];
 }
 
 
@@ -360,7 +376,14 @@
             //testPoint = NSMakePoint (0, 0);
             ROI *myRoi;
             myRoi=[roiImageList objectAtIndex: i];
-            testPoint=[myRoi centroid];
+            
+            
+            testPoint = [_rotationCenter pointAtIndex:0];
+            
+            //testPoint=[myRoi centroid];           // normal rotation
+            
+            
+            
             [myRoi rotate:rotationAngle :testPoint];
             //NSLog(@"Applied rotation angle: %f degrees. Roi %d centroid at %f,%f",rotationAngle,i,testPoint.x,testPoint.y);
         }

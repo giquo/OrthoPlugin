@@ -29,6 +29,7 @@
     ViewerController *_viewerController;
     
     ROI *_femurLayer, *_femurRoi, *_originalFemurOpacityLayer;
+    ROI *_rotationCenter;
     
     BOOL procedureLocked;                               // KVO for chBoxLockProcedure
     
